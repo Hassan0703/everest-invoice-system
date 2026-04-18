@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Everest Movers - Invoice System{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Everest Movers Logo" class="nav-logo">
+            <div class="nav-title">
+                <span class="nav-company">Everest Movers</span>
+                <span class="nav-tagline">Cargo Packaging L.L.C</span>
+            </div>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">All Invoices</a>
+            <a href="{{ url_for('create_invoice') }}" class="nav-btn">+ New Invoice</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

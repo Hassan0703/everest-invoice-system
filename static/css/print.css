@@ -1,0 +1,81 @@
+/* ============================================
+   Print CSS - A4 Perfect Output
+   ============================================ */
+
+@media print {
+    @page {
+        size: A4;
+        margin: 0;
+    }
+
+    /* Hide everything except the invoice */
+    body {
+        background: white !important;
+        margin: 0;
+        padding: 0;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    .print-toolbar {
+        display: none !important;
+    }
+
+    .preview-body {
+        background: white !important;
+    }
+
+    /* Invoice page takes full page */
+    .invoice-page {
+        width: 100% !important;
+        min-height: 100% !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        page-break-after: avoid;
+    }
+
+    /* Ensure table doesn't break awkwardly */
+    .inv-items-table {
+        page-break-inside: avoid;
+    }
+
+    .inv-bottom-bar {
+        page-break-inside: avoid;
+    }
+
+    /* Ensure colors print */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* Force backgrounds to print */
+    .inv-header-stripe {
+        background: linear-gradient(180deg, #4a7c2f 0%, #6aad3f 50%, #2d5a1b 100%) !important;
+        print-color-adjust: exact;
+    }
+
+    .inv-items-table thead tr,
+    .inv-items-table th {
+        background: #2d2d2d !important;
+        color: white !important;
+    }
+
+    .tot-final-row td {
+        background: #4a7c2f !important;
+        color: white !important;
+    }
+
+    .inv-bottom-bar {
+        background: #1a1a1a !important;
+        color: white !important;
+    }
+
+    .bottom-contact,
+    .bottom-thanks {
+        color: white !important;
+    }
+}

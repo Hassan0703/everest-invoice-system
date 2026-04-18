@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+{% block title %}Create Invoice - Everest Movers{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Create Invoice</h1>
+        <p class="page-subtitle">Fill in the details below to generate a new invoice</p>
+    </div>
+    <div class="header-actions">
+        <button class="btn-secondary" onclick="history.back()">← Back</button>
+        <button class="btn-primary" onclick="saveInvoice()">Save Invoice</button>
+    </div>
+</div>
+
+<div class="form-card">
+    <!-- Invoice Info Row -->
+    <div class="form-section">
+        <h2 class="section-title">Invoice Details</h2>
+        <div class="form-grid-3">
+            <div class="form-group">
+                <label>Invoice Number</label>
+                <input type="text" id="invoice_number" value="{{ invoice_number }}" class="form-input">
+            </div>
+            <div class="form-group">
+                <label>Invoice Date</label>
+                <input type="date" id="invoice_date" value="{{ today }}" class="form-input">
+            </div>
+            <div class="form-group">
+                <label>Due Date</label>
+                <input type="date" id="due_date" class="form-input">
+            </div>
+        </div>
+    </div>
+
+    <div class="form-two-col">
+        <!-- Bill To -->
+        <div class="form-section">
+            <h2 class="section-title">Invoice To (Client)</h2>
+            <div class="form-group">
+                <label>Company / Client Name</label>
+                <input type="text" id="bill_to_name" placeholder="e.g. GAC Shipping LLC" class="form-input">
+            </div>
+            <div class="form-group">
+                <label>Address</label>
+                <textarea id="bill_to_address" placeholder="Full address..." class="form-textarea" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="bill_to_email" placeholder="client@email.com" class="form-input">
+            </div>
+        </div>
+
+        <!-- Company Info -->
+        <div class="form-section">
+            <h2 class="section-title">Invoice From (Your Company)</h2>
+            <div class="form-group">
+                <label>Company Name</label>
+                <input type="text" id="company_name" value="EVEREST MOVERS CARGO PACKAGING LLC" class="form-input">
+            </div>
+            <div class="form-group">
+                <label>Address</label>
+                <textarea id="company_address" class="form-textarea" rows="4">IT CANTER BUR DUBAI OFFICE NO 403
+DUBAI UAE
+TRN# 10055454446300003</textarea>
+            </div>
+            <div class="form-group">
+                <label>Phone</label>
+                <input type="text" id="company_phone" value="+92 3096882551" class="form-input">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="company_email" value="support@eversemovers.com" class="form-input">
+            </div>
+        </div>
+    </div>
+
+    <!-- Items Table -->
+    <div class="form-section">
+        <div class="section-header-row">
+            <h2 class="section-title">Invoice Items</h2>
+            <button class="btn-add-row" onclick="addRow()">+ Add Row</button>
+        </div>
+
+        <div class="table-scroll">
+            <table class="items-table" id="items-table">
+                <thead>
+                    <tr>
+                        <th style="width:40px">NO</th>
+                        <th style="width:100px">DATE</th>
+                        <th style="width:110px">JOB NO</th>
+                        <th style="width:90px">CLIENT</th>
+                        <th style="width:130px">DESCRIPTION</th>
+                        <th style="width:90px">LOCATION</th>
+                        <th style="width:60px">CREW</th>
+                        <th style="width:100px">PICK & DROP</th>
+                        <th style="width:100px">CREW AMOUNT</th>
+                        <th style="width:90px">TOTAL</th>
+                        <th style="width:40px"></th>
+                    </tr>
+                </thead>
+                <tbody id="items-body">
+                    <!-- Rows added dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Totals & Summary -->
+    <div class="form-bottom-row">
+        <div class="form-section terms-section">
+            <h2 class="section-title">Terms & Conditions</h2>
+            <textarea id="terms" class="form-textarea" rows="5" placeholder="Enter terms and conditions...">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a</textarea>
+        </div>
+
+        <div class="form-section totals-section">
+            <h2 class="section-title">Summary</h2>
+            <div class="summary-grid">
+                <div class="form-group">
+                    <label>Discount (AED)</label>
+                    <input type="number" id="discount" value="0" min="0" class="form-input" oninput="calcTotals()">
+                </div>
+                <div class="form-group">
+                    <label>Tax (%)</label>
+                    <input type="number" id="tax_percent" value="0" min="0" max="100" class="form-input" oninput="calcTotals()">
+                </div>
+            </div>
+            <div class="total-display">
+                <div class="total-row"><span>Sub Total:</span><span id="disp-subtotal">0.00</span></div>
+                <div class="total-row"><span>Discount:</span><span id="disp-discount">0.00</span></div>
+                <div class="total-row"><span>Tax:</span><span id="disp-tax">0.00</span></div>
+                <div class="total-row total-final"><span>TOTAL:</span><span id="disp-total">0.00</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <button class="btn-secondary" onclick="history.back()">Cancel</button>
+        <button class="btn-primary large" onclick="saveInvoice()">💾 Save Invoice</button>
+    </div>
+</div>
+
+<script>
+let rowCount = 0;
+
+function addRow() {
+    rowCount++;
+    const tbody = document.getElementById('items-body');
+    const tr = document.createElement('tr');
+    tr.id = 'row-' + rowCount;
+    tr.innerHTML = `
+        <td class="row-num">${String(rowCount).padStart(2, '0')}</td>
+        <td><input type="date" class="cell-input" oninput="calcTotals()"></td>
+        <td><input type="text" class="cell-input" placeholder="Job No"></td>
+        <td><input type="text" class="cell-input" placeholder="Client"></td>
+        <td><input type="text" class="cell-input" placeholder="Description"></td>
+        <td><input type="text" class="cell-input" placeholder="Location"></td>
+        <td><input type="text" class="cell-input" placeholder="0"></td>
+        <td><input type="number" class="cell-input amount-input" placeholder="0" min="0" oninput="calcRowTotal(this)"></td>
+        <td><input type="number" class="cell-input amount-input" placeholder="0" min="0" oninput="calcRowTotal(this)"></td>
+        <td class="row-total">0.00</td>
+        <td><button class="btn-remove-row" onclick="removeRow('row-${rowCount}')">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+    calcTotals();
+}
+
+function calcRowTotal(input) {
+    const row = input.closest('tr');
+    const inputs = row.querySelectorAll('.amount-input');
+    const pick = parseFloat(inputs[0].value) || 0;
+    const crew = parseFloat(inputs[1].value) || 0;
+    const total = Math.max(0, pick) + Math.max(0, crew);
+    row.querySelector('.row-total').textContent = total.toFixed(2);
+    calcTotals();
+}
+
+function calcTotals() {
+    const rows = document.querySelectorAll('#items-body tr');
+    let subtotal = 0;
+    rows.forEach(row => {
+        subtotal += parseFloat(row.querySelector('.row-total').textContent) || 0;
+    });
+    const discount = Math.max(0, parseFloat(document.getElementById('discount').value) || 0);
+    const taxPct = Math.max(0, parseFloat(document.getElementById('tax_percent').value) || 0);
+    const taxAmt = subtotal * (taxPct / 100);
+    const total = subtotal + taxAmt - discount;
+
+    document.getElementById('disp-subtotal').textContent = subtotal.toFixed(2);
+    document.getElementById('disp-discount').textContent = discount.toFixed(2);
+    document.getElementById('disp-tax').textContent = taxAmt.toFixed(2);
+    document.getElementById('disp-total').textContent = Math.max(0, total).toFixed(2);
+}
+
+function removeRow(id) {
+    const row = document.getElementById(id);
+    if (row) row.remove();
+    renumberRows();
+    calcTotals();
+}
+
+function renumberRows() {
+    const rows = document.querySelectorAll('#items-body tr');
+    rows.forEach((row, i) => {
+        row.querySelector('.row-num').textContent = String(i + 1).padStart(2, '0');
+    });
+    rowCount = rows.length;
+}
+
+function saveInvoice() {
+    // Validate
+    const invNum = document.getElementById('invoice_number').value.trim();
+    const invDate = document.getElementById('invoice_date').value.trim();
+    if (!invNum) { alert('Invoice number is required.'); return; }
+    if (!invDate) { alert('Invoice date is required.'); return; }
+
+    const rows = document.querySelectorAll('#items-body tr');
+    if (rows.length === 0) { alert('Please add at least one item.'); return; }
+
+    // Collect items
+    const items = [];
+    rows.forEach(row => {
+        const inputs = row.querySelectorAll('input');
+        items.push({
+            date: inputs[0].value,
+            job_no: inputs[1].value,
+            client: inputs[2].value,
+            description: inputs[3].value,
+            location: inputs[4].value,
+            crew: inputs[5].value,
+            pick_drop_charges: parseFloat(inputs[6].value) || 0,
+            crew_amount: parseFloat(inputs[7].value) || 0,
+        });
+    });
+
+    const payload = {
+        invoice_number: invNum,
+        invoice_date: invDate,
+        due_date: document.getElementById('due_date').value,
+        bill_to_name: document.getElementById('bill_to_name').value,
+        bill_to_address: document.getElementById('bill_to_address').value,
+        bill_to_email: document.getElementById('bill_to_email').value,
+        company_name: document.getElementById('company_name').value,
+        company_address: document.getElementById('company_address').value,
+        company_phone: document.getElementById('company_phone').value,
+        company_email: document.getElementById('company_email').value,
+        tax_percent: parseFloat(document.getElementById('tax_percent').value) || 0,
+        discount: parseFloat(document.getElementById('discount').value) || 0,
+        terms: document.getElementById('terms').value,
+        items: items
+    };
+
+    fetch('/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = '/invoice/' + data.invoice_id;
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(err => alert('Save failed: ' + err));
+}
+
+// Start with 3 rows
+addRow(); addRow(); addRow();
+</script>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}All Invoices - Everest Movers{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Invoices</h1>
+        <p class="page-subtitle">Manage all your invoices in one place</p>
+    </div>
+    <a href="{{ url_for('create_invoice') }}" class="btn-primary">+ Create New Invoice</a>
+</div>
+
+{% if invoices %}
+<div class="invoice-table-wrapper">
+    <table class="invoice-list-table">
+        <thead>
+            <tr>
+                <th>Invoice #</th>
+                <th>Date</th>
+                <th>Bill To</th>
+                <th>Due Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inv in invoices %}
+            <tr>
+                <td><strong>{{ inv.invoice_number }}</strong></td>
+                <td>{{ inv.invoice_date }}</td>
+                <td>{{ inv.bill_to_name or '—' }}</td>
+                <td>{{ inv.due_date or '—' }}</td>
+                <td class="action-cell">
+                    <a href="{{ url_for('view_invoice', invoice_id=inv.id) }}" class="btn-view">Preview</a>
+                    <button class="btn-delete" onclick="deleteInvoice({{ inv.id }})">Delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon">📄</div>
+    <h2>No invoices yet</h2>
+    <p>Create your first invoice to get started.</p>
+    <a href="{{ url_for('create_invoice') }}" class="btn-primary">Create Invoice</a>
+</div>
+{% endif %}
+
+<script>
+function deleteInvoice(id) {
+    if (!confirm('Are you sure you want to delete this invoice?')) return;
+    fetch('/delete/' + id, { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) location.reload();
+            else alert('Error: ' + data.error);
+        });
+}
+</script>
+{% endblock %}

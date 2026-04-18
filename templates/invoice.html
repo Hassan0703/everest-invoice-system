@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice {{ invoice.invoice_number }} - Everest Movers</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/print.css') }}">
+</head>
+<body class="preview-body">
+
+    <!-- Screen Toolbar (hidden on print) -->
+    <div class="print-toolbar no-print">
+        <div class="toolbar-left">
+            <a href="{{ url_for('index') }}" class="btn-secondary">← All Invoices</a>
+            <a href="{{ url_for('create_invoice') }}" class="btn-secondary">+ New Invoice</a>
+        </div>
+        <div class="toolbar-right">
+            <button class="btn-primary" onclick="window.print()">🖨 Print / Save PDF</button>
+        </div>
+    </div>
+
+    <!-- INVOICE DOCUMENT (print target) -->
+    <div class="invoice-page" id="invoice-doc">
+
+        <!-- HEADER -->
+        <div class="inv-header">
+            <div class="inv-header-left">
+                <div class="inv-logo-block">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="inv-logo">
+                    <div class="inv-brand-text">
+                        <span class="inv-company-name">EVEREST MOVERS</span>
+                        <span class="inv-tagline">CARGO PACKAGING L.L.C</span>
+                    </div>
+                </div>
+                <div class="inv-header-stripe"></div>
+            </div>
+            <div class="inv-header-right">
+                <div class="inv-title-block">
+                    <h1 class="inv-title">INVOICE</h1>
+                    <table class="inv-meta-table">
+                        <tr>
+                            <td class="meta-label">Invoice Number :</td>
+                            <td class="meta-value">{{ invoice.invoice_number }}</td>
+                        </tr>
+                        <tr>
+                            <td class="meta-label">Invoice Date :</td>
+                            <td class="meta-value">{{ invoice.invoice_date }}</td>
+                        </tr>
+                        {% if invoice.due_date %}
+                        <tr>
+                            <td class="meta-label">Due Date :</td>
+                            <td class="meta-value">{{ invoice.due_date }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- BILL TO / FROM -->
+        <div class="inv-parties">
+            <div class="inv-bill-to">
+                <p class="party-label">Invoice To:</p>
+                <p class="party-name">{{ invoice.bill_to_name }}</p>
+                <div class="party-address">
+                    {% if invoice.bill_to_address %}
+                        {% for line in invoice.bill_to_address.split('\n') %}
+                        <p>{{ line }}</p>
+                        {% endfor %}
+                    {% endif %}
+                    {% if invoice.bill_to_email %}
+                    <p>Email: {{ invoice.bill_to_email }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="inv-bill-from">
+                <p class="party-label">Invoice From:</p>
+                <p class="party-name">{{ invoice.company_name }}</p>
+                <div class="party-address">
+                    {% for line in invoice.company_address.split('\n') %}
+                    <p>{{ line }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ITEMS TABLE -->
+        <table class="inv-items-table">
+            <thead>
+                <tr>
+                    <th class="col-no">NO</th>
+                    <th class="col-dtd">DTD</th>
+                    <th class="col-jobno">JOB NO</th>
+                    <th class="col-client">CLIENT</th>
+                    <th class="col-supplier">SUPPLIER</th>
+                    <th class="col-location">LOCATION</th>
+                    <th class="col-crew">CREW</th>
+                    <th class="col-pickdrop">PICK &amp; DROP CHARGES</th>
+                    <th class="col-crewamt">CREW AMOUNT</th>
+                    <th class="col-invnum">INVOICE NUMBER</th>
+                    <th class="col-total">TOTAL AMOUNT</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr class="{% if loop.index is odd %}row-odd{% else %}row-even{% endif %}">
+                    <td class="col-no">{{ '%02d'|format(loop.index) }}</td>
+                    <td class="col-dtd">{{ item.item_date }}</td>
+                    <td class="col-jobno">{{ item.job_no }}</td>
+                    <td class="col-client">{{ item.client }}</td>
+                    <td class="col-supplier">{{ item.description }}</td>
+                    <td class="col-location">{{ item.location }}</td>
+                    <td class="col-crew">{{ item.crew }}</td>
+                    <td class="col-pickdrop">{{ '%.0f'|format(item.pick_drop_charges) }}</td>
+                    <td class="col-crewamt">{{ '%.0f'|format(item.crew_amount) }}</td>
+                    <td class="col-invnum">{{ invoice.invoice_number }}</td>
+                    <td class="col-total">{{ '%.0f'|format(item.total_amount) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- FOOTER AREA: Terms + Totals -->
+        <div class="inv-footer-area">
+            <!-- Left: Signature + Terms -->
+            <div class="inv-left-footer">
+                <div class="inv-signature-area">
+                    <div class="signature-line"></div>
+                    <p class="signature-text">Authorization Sign</p>
+                </div>
+                <div class="inv-terms">
+                    <p class="terms-title">Terms &amp; Conditions</p>
+                    <p class="terms-text">{{ invoice.terms or 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a' }}</p>
+                </div>
+            </div>
+
+            <!-- Right: Totals Table -->
+            <div class="inv-totals-wrapper">
+                <table class="inv-totals-table">
+                    <tr>
+                        <td class="tot-label">SUB TOTAL:</td>
+                        <td class="tot-value">{{ '%.2f'|format(subtotal) }}</td>
+                    </tr>
+                    <tr>
+                        <td class="tot-label">DISCOUNT:</td>
+                        <td class="tot-value">{{ '%.2f'|format(invoice.discount) }}</td>
+                    </tr>
+                    <tr>
+                        <td class="tot-label">TAX ({{ invoice.tax_percent|int }}%):</td>
+                        <td class="tot-value">{{ '%.2f'|format(tax_amount) }}</td>
+                    </tr>
+                    <tr class="tot-final-row">
+                        <td class="tot-final-label">TOTAL :</td>
+                        <td class="tot-final-value">{{ '%.2f'|format(total) }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- BOTTOM FOOTER BAR -->
+        <div class="inv-bottom-bar">
+            <div class="bottom-contact">
+                <span class="contact-icon">📞</span>
+                <span>{{ invoice.company_phone }}</span>
+            </div>
+            <div class="bottom-contact">
+                <span class="contact-icon">✉</span>
+                <span>{{ invoice.company_email }}</span>
+            </div>
+            <div class="bottom-contact">
+                <span class="contact-icon">📍</span>
+                <span>It Center Bur Dubai Office#403</span>
+            </div>
+            <div class="bottom-thanks">
+                <strong>THANKS FOR BUSINESS</strong>
+            </div>
+        </div>
+
+    </div><!-- end invoice-page -->
+
+</body>
+</html>
