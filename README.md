@@ -15,9 +15,19 @@ Everest Movers Invoice System is a **desktop invoice generator** that runs local
 - **Print and PDF export**: print directly or download as PDF using the browser print dialog
 
 ## Screenshots Section
-![App Screenshot](./assets/screenshot.png)
+Screenshots for this project are stored in **`static/images/screenshots/`**.
 
-Screenshots for this project are stored in **`static/screenshot/`**. Replace the image above with your own screenshot file (or update the path) to show the latest UI.
+### Overview
+![Overview](./static/images/screenshots/overview.png)
+
+### Data Input Form (First Half)
+![Data Input Form First Half](./static/images/screenshots/data_inputform_first_half.png)
+
+### Data Input Form (Second Half)
+![Data Input Form Second Half](./static/images/screenshots/data_inputform_second_half.png.png)
+
+### Invoice Print View
+![Invoice Print](./static/images/screenshots/invoice%20print.png)
 
 ## How It Works (step-by-step flow)
 1. **Launch the app** by running the desktop executable.
